@@ -39,9 +39,7 @@ class Model:
     def compile(self):
         self.model = tf.keras.Sequential([
             tf.keras.layers.Dense(30, activation='relu'),
-            tf.keras.layers.Dropout(rate=0.1),
             tf.keras.layers.Dense(16, activation='relu'),
-            tf.keras.layers.Dropout(rate=0.1),
             tf.keras.layers.Dense(16, activation='relu'),
             tf.keras.layers.Dense(16, activation='relu'),
             tf.keras.layers.Dense(16, activation='relu'),
