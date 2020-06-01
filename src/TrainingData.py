@@ -37,20 +37,18 @@ class TrainingData:
             self.values = pd.concat([self.values, collection], axis=1)
 
     def __cache(self):
-        try:
-            self.values.to_hdf('../data/cached/training/training_data.h5', key='data')
-        except:
-            print('Warning: Failed to cache training data values.')
+        if self.values is None:
+            raise ValueError('Training data empty.')
+        self.values.to_hdf('../data/cached/training/training_data.h5', key='data')
 
-    def prepare(self, is_relative=True):
+    def prepare(self):
         if self.is_prepared:
-            print('all done already')
             return
         self.__drop_NA_SP500()
         self.__fill_NA_other_series()
         self.__calc_changes()
         self.__make_target_row()
-        self.__remove_remaining_NA()
+        self.__drop_NA_remaining()
         self.__cache()
         self.is_prepared = True
 
@@ -74,13 +72,11 @@ class TrainingData:
         self.values.loc[self.values.Target <= 0, 'Target'] = 0
         self.values.loc[self.values.Target > 0, 'Target'] = 1
 
-    def __remove_remaining_NA(self):
+    def __drop_NA_remaining(self):
         self.values.dropna(inplace=True)
 
 
 def prepare_training_data():
-
-
     t = TrainingData()
     indices = DataCollection(collect=Config.indices, name='indices').load()
     commodities = DataCollection(collect=Config.commodities, name='commodities').load()
@@ -90,6 +86,7 @@ def prepare_training_data():
     t.load()
     t.prepare()
     print(t.values)
+
 
 if __name__ == '__main__':
     prepare_training_data()

@@ -24,9 +24,10 @@ class FinancialSeries:
     def __fetch_cached(self):
         try:
             self.values = pd.read_hdf('../data/cached/tickers/{}.h5'.format(self.ticker))  #
-            return self.values
-        except:
+        except FileNotFoundError:
+            self.values = None
             print('Could not load cached {}, will fetch data online'.format(self.ticker))
+        return self.values
 
     def __fetch_online(self):
         try:
@@ -42,10 +43,10 @@ class FinancialSeries:
         self.values.rename(self.name, inplace=True)
 
     def __cache(self):
-        try:
-            self.values.to_hdf('../data/cached/tickers/{}.h5'.format(self.ticker), key='data')
-        except:
-            print('Warning: Failed to cache online values.')
+        if self.values is None:
+            print('Warning: Financial series is empty. Could not store values. Online retrieval probably failed.')
+            return
+        self.values.to_hdf('../data/cached/tickers/{}.h5'.format(self.ticker), key='data')
 
     def plot(self):
         if self.values is not None:

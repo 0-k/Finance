@@ -42,6 +42,8 @@ class DataCollection:
     def __cache(self):
         if self.name is None:
             raise NameError('No data collection name was given.')
+        if self.values is None:
+            raise ValueError('Data collection empty.')
         self.values.to_hdf('../data/cached/training/data_collection_{}.h5'.format(self.name), key='data')
 
 
