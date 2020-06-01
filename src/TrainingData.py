@@ -82,8 +82,16 @@ class TrainingData:
 
     def __make_target_row(self):
         self.values['Target'] = self.values['SP_500'].shift(-1)
+        #print(self.values['Target'])
+        """
+        self.values.loc[self.values['Target'] <= -0.01, 'Target'] = -1
+        self.values.loc[self.values['Target'] >= 0.01, 'Target'] = 1
+        self.values.loc[(self.values['Target'] > -0.01) & (self.values['Target'] < 0.01), 'Target'] = 0
+        """
         self.values.loc[self.values.Target <= 0, 'Target'] = 0
         self.values.loc[self.values.Target > 0, 'Target'] = 1
+
+
 
     def __drop_NA_remaining(self):
         self.values.dropna(inplace=True)
@@ -101,8 +109,13 @@ class TrainingData:
             self.values = pd.DataFrame(x_scaled)
             targets = targets.reset_index(drop=True)
             self.values['Target'] = targets
-            self.values.loc[self.values['Target'] <= 0, 'Target'] = 0
-            self.values.loc[self.values['Target'] > 0, 'Target'] = 1
+            """
+            self.values.loc[self.values['Target'] <= -0.01, 'Target'] = -1
+            self.values.loc[self.values['Target'] >= 0.01, 'Target'] = 1
+            self.values.loc[(self.values['Target'] > -0.01) & (self.values['Target'] < 0.01), 'Target'] = 0
+            """
+            self.values.loc[self.values.Target <= 0, 'Target'] = 0
+            self.values.loc[self.values.Target > 0, 'Target'] = 1
         else:
             if self.is_testing:
                 data = self.values
