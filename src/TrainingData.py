@@ -113,15 +113,15 @@ class TrainingData:
             data.loc[data['Target'] > 0, 'Target'] = 1
 
     def split(self, size_training_data=0.5):
-        if (size_training_data <= 0) or (size_training_data >= 1):
-            raise ValueError('Relative size of training data must be larger than 0 and smaller than 1')
+        if (size_training_data <= 0) or (size_training_data >= 0.8):
+            raise ValueError('Relative size of training data must be larger than 0 and smaller than 0.8')
         if not self.is_prepared:
             raise BrokenPipeError('Training data needs to be prepared first.')
         data = self.values
-        self.training = data.sample(frac=size_training_data, random_state=self.random_number_seed)
-        data_rest = data.drop(self.training.index)
-        self.validation = data_rest.sample(frac=0.5, random_state=self.random_number_seed)
-        self.test = data_rest.drop(self.validation.index)
+        self.test = data.sample(frac=0.2, random_state=self.random_number_seed)
+        data_rest = data.drop(self.test.index)
+        self.training = data_rest.sample(frac=size_training_data, random_state=self.random_number_seed)
+        self.validation = data_rest.drop(self.training.index)
 
 
 def prepare_training_data():

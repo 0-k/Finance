@@ -15,13 +15,13 @@ class Model:
         self.data = TrainingData()
         self.data.load()
         self.data.normalize()
-        self.data.split(size_training_data=0.71)
+        self.data.split(size_training_data=0.6)
 
     def initialize_test(self):
         self.data = TrainingData(is_testing=True)
         self.data.load()
         self.data.normalize()
-        self.data.split(size_training_data=0.71)
+        self.data.split(size_training_data=0.6)
 
     def format_targets(self):
         self.data.training_targets = self.data.training.pop('Target').astype('int64')
