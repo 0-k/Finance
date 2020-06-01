@@ -32,7 +32,6 @@ class TrainingData:
     def __load_test(self):
         self.values = pd.read_csv('../data/cached/training/training_data_test.csv', sep=';', header=0, decimal=',')
         self.is_prepared = True
-        print(self.values)
         return self.values
 
     def __load_cached(self):
