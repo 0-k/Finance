@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 from src.FinancialSeries import FinancialSeries
 from config.config import Config
 

@@ -1,24 +1,38 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from src.DataCollection import DataCollection
 from config.config import Config
-
+from sklearn import preprocessing
+import matplotlib.pyplot as plt
 
 class TrainingData:
 
-    def __init__(self):
+    def __init__(self, is_testing=False):
         self.values = None
         self.columns = Config.columns
         self.data_collections = None
         self.is_prepared = False
+        self.training = None
+        self.validation = None
+        self.test = None
+        self.random_number_seed = 3255087
+        self.new_normalization_method = True
+        self.is_testing = is_testing
 
     def load(self, use_cached_values_if_possible=True):
+        if self.is_testing:
+            self.__load_test()
+            return
         if use_cached_values_if_possible:
             self.__load_cached()
         if self.values is None:
             self.__load_data_collections()
             self.__cache()
+        return self.values
+
+    def __load_test(self):
+        self.values = pd.read_csv('../data/cached/training/training_data_test.csv', sep=';', header=0, decimal=',')
+        self.is_prepared = True
+        print(self.values)
         return self.values
 
     def __load_cached(self):
@@ -75,6 +89,40 @@ class TrainingData:
     def __drop_NA_remaining(self):
         self.values.dropna(inplace=True)
 
+    def normalize(self):
+        if self.new_normalization_method:
+            if self.is_testing:
+                data = self.values
+            else:
+                data = self.values.truncate(after=pd.Timestamp('2019-12-31'))
+            targets = data['Target']
+            data = data.drop(['Target'], axis=1)
+            x = data.values  # returns a numpy array
+            x_scaled = preprocessing.normalize(x)
+            self.values = pd.DataFrame(x_scaled)
+            targets = targets.reset_index(drop=True)
+            self.values['Target'] = targets
+            self.values.loc[self.values['Target'] <= 0, 'Target'] = 0
+            self.values.loc[self.values['Target'] > 0, 'Target'] = 1
+        else:
+            if self.is_testing:
+                data = self.values
+            else:
+                data = self.values.truncate(after=pd.Timestamp('2019-12-31'))
+            data.loc[data['Target'] <= 0, 'Target'] = 0
+            data.loc[data['Target'] > 0, 'Target'] = 1
+
+    def split(self, size_training_data=0.5):
+        if (size_training_data <= 0) or (size_training_data >= 1):
+            raise ValueError('Relative size of training data must be larger than 0 and smaller than 1')
+        if not self.is_prepared:
+            raise BrokenPipeError('Training data needs to be prepared first.')
+        data = self.values
+        self.training = data.sample(frac=size_training_data, random_state=self.random_number_seed)
+        data_rest = data.drop(self.training.index)
+        self.validation = data_rest.sample(frac=0.5, random_state=self.random_number_seed)
+        self.test = data_rest.drop(self.validation.index)
+
 
 def prepare_training_data():
     t = TrainingData()
@@ -85,7 +133,8 @@ def prepare_training_data():
     t.data_collections = [indices, commodities, currencies, treasuries]
     t.load()
     t.prepare()
-    print(t.values)
+    t.normalize()
+    t.split()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,5 @@
 import pandas as pd
 import yfinance as yt
-import numpy as np
 import matplotlib.pyplot as plt
 
 
