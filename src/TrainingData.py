@@ -82,8 +82,21 @@ class TrainingData:
 
     def __make_target_row(self):
         self.values['Target'] = self.values['SP_500'].shift(-1)
-        self.values.loc[self.values.Target <= 0, 'Target'] = 0
-        self.values.loc[self.values.Target > 0, 'Target'] = 1
+
+
+        self.values.loc[self.values['Target'] >= 0.03, 'Target'] = 7
+        self.values.loc[(self.values['Target'] >= 0.02) & (self.values['Target'] < 0.03), 'Target'] = 6
+        self.values.loc[(self.values['Target'] >= 0.005) & (self.values['Target'] < 0.02), 'Target'] = 5
+        self.values.loc[(self.values['Target'] >= 0.002) & (self.values['Target'] < 0.005), 'Target'] = 4
+        self.values.loc[(self.values['Target'] >= -0.002) & (self.values['Target'] < 0.002), 'Target'] = 3
+        self.values.loc[(self.values['Target'] >= -0.005) & (self.values['Target'] < -0.002), 'Target'] = 2
+        self.values.loc[(self.values['Target'] >= -0.02) & (self.values['Target'] < -0.005), 'Target'] = 1
+        self.values.loc[self.values['Target'] < -0.02, 'Target'] = 0
+
+        #self.values.loc[self.values.Target <= 0, 'Target'] = 0
+        #self.values.loc[self.values.Target > 0, 'Target'] = 1
+
+
 
     def __drop_NA_remaining(self):
         self.values.dropna(inplace=True)
@@ -101,8 +114,20 @@ class TrainingData:
             self.values = pd.DataFrame(x_scaled)
             targets = targets.reset_index(drop=True)
             self.values['Target'] = targets
-            self.values.loc[self.values['Target'] <= 0, 'Target'] = 0
-            self.values.loc[self.values['Target'] > 0, 'Target'] = 1
+            """
+            print('jelllo')
+            self.values.loc[self.values['Target'] >= 0.06, 'Target'] = 7
+            self.values.loc[(self.values['Target'] >= 0.04) & (self.values['Target'] < 0.06), 'Target'] = 6
+            self.values.loc[(self.values['Target'] >= 0.02) & (self.values['Target'] < 0.04), 'Target'] = 5
+            self.values.loc[(self.values['Target'] >= 0.005) & (self.values['Target'] < 0.02), 'Target'] = 4
+            self.values.loc[(self.values['Target'] >= -0.005) & (self.values['Target'] < 0.005), 'Target'] = 3
+            self.values.loc[(self.values['Target'] >= -0.02) & (self.values['Target'] < -0.005), 'Target'] = 2
+            self.values.loc[(self.values['Target'] >= -0.04) & (self.values['Target'] < -0.02), 'Target'] = 1
+            self.values.loc[self.values['Target'] < -0.04, 'Target'] = 0
+            """
+
+            #self.values.loc[self.values.Target <= 0, 'Target'] = 0
+            #self.values.loc[self.values.Target > 0, 'Target'] = 1
         else:
             if self.is_testing:
                 data = self.values
@@ -130,7 +155,7 @@ def prepare_training_data():
     currencies = DataCollection(collect=Config.currencies, name='currencies').load()
     treasuries = DataCollection(collect=Config.treasuries, name='treasuries').load()
     t.data_collections = [indices, commodities, currencies, treasuries]
-    t.load()
+    t.load(use_cached_values_if_possible=False)
     t.prepare()
     t.normalize()
     t.split()
