@@ -1,10 +1,12 @@
 import tensorflow as tf
-from src.TrainingData import TrainingData
 import matplotlib.pyplot as plt
 from tensorflow.keras import initializers
 import tensorflow.keras.backend as kb
 import numpy as np
 import math
+
+from src.TrainingData import TrainingData
+
 
 class Model:
 
