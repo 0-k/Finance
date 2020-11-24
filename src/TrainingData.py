@@ -1,11 +1,11 @@
 import pandas as pd
-from src.DataCollection import DataCollection
-from config.config import Config
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+from src.DataCollection import DataCollection
+from config.config import Config
+
 
 class TrainingData:
-
     def __init__(self, is_testing=False):
         self.values = None
         self.columns = Config.columns
@@ -81,9 +81,8 @@ class TrainingData:
                 raise ValueError('Could not retrieve column type for ' + column)
 
     def __make_target_row(self):
+        #TODO: clean this
         self.values['Target'] = self.values['SP_500'].shift(-1)
-
-
         self.values.loc[self.values['Target'] >= 0.03, 'Target'] = 7
         self.values.loc[(self.values['Target'] >= 0.02) & (self.values['Target'] < 0.03), 'Target'] = 6
         self.values.loc[(self.values['Target'] >= 0.005) & (self.values['Target'] < 0.02), 'Target'] = 5
@@ -92,11 +91,6 @@ class TrainingData:
         self.values.loc[(self.values['Target'] >= -0.005) & (self.values['Target'] < -0.002), 'Target'] = 2
         self.values.loc[(self.values['Target'] >= -0.02) & (self.values['Target'] < -0.005), 'Target'] = 1
         self.values.loc[self.values['Target'] < -0.02, 'Target'] = 0
-
-        #self.values.loc[self.values.Target <= 0, 'Target'] = 0
-        #self.values.loc[self.values.Target > 0, 'Target'] = 1
-
-
 
     def __drop_NA_remaining(self):
         self.values.dropna(inplace=True)
@@ -114,20 +108,6 @@ class TrainingData:
             self.values = pd.DataFrame(x_scaled)
             targets = targets.reset_index(drop=True)
             self.values['Target'] = targets
-            """
-            print('jelllo')
-            self.values.loc[self.values['Target'] >= 0.06, 'Target'] = 7
-            self.values.loc[(self.values['Target'] >= 0.04) & (self.values['Target'] < 0.06), 'Target'] = 6
-            self.values.loc[(self.values['Target'] >= 0.02) & (self.values['Target'] < 0.04), 'Target'] = 5
-            self.values.loc[(self.values['Target'] >= 0.005) & (self.values['Target'] < 0.02), 'Target'] = 4
-            self.values.loc[(self.values['Target'] >= -0.005) & (self.values['Target'] < 0.005), 'Target'] = 3
-            self.values.loc[(self.values['Target'] >= -0.02) & (self.values['Target'] < -0.005), 'Target'] = 2
-            self.values.loc[(self.values['Target'] >= -0.04) & (self.values['Target'] < -0.02), 'Target'] = 1
-            self.values.loc[self.values['Target'] < -0.04, 'Target'] = 0
-            """
-
-            #self.values.loc[self.values.Target <= 0, 'Target'] = 0
-            #self.values.loc[self.values.Target > 0, 'Target'] = 1
         else:
             if self.is_testing:
                 data = self.values
@@ -146,7 +126,6 @@ class TrainingData:
         data_rest = data.drop(self.test.index)
         self.training = data_rest.sample(frac=size_training_data, random_state=self.random_number_seed)
         self.validation = data_rest.drop(self.training.index)
-
 
 def prepare_training_data():
     t = TrainingData()
